@@ -6,9 +6,6 @@
 #include <sstream>
 #include "IFlowTelemetryService.h"
 #include "../device/IFlowSensor.h"
-#ifdef ESP_PLATFORM
-#include "../device/YfS201FlowSensor.h"
-#endif
 #include "../device/IValveDevice.h"
 #include "../dto/ValveResponseDto.h"
 #include "../dto/MinuteBucketEntryDto.h"
