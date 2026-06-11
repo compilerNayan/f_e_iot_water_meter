@@ -18,7 +18,7 @@
 
 static DRAM_ATTR volatile UInt32 gYfS201PulseCount = 0;
 
-/*--@Component--*/
+/* @Component */
 class YfS201FlowSensor : public IFlowSensor {
     Private Static constexpr Int kPulsesPerLiter = FLOW_SENSOR_PULSES_PER_LITER;
     Private Static constexpr Int kPulsePin = FLOW_SENSOR_PULSE_PIN;
