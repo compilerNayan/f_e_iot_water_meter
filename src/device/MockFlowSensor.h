@@ -6,13 +6,13 @@
 #include "esp_random.h"
 #include "logger/ILogger.h"
 
-/*--@Component--*/
+/* @Component */
 class MockFlowSensor : public IFlowSensor {
     Private Int currentMlPerSecond;
     Private Int burstRemaining;
 
-    /*--@Autowired--*/
-    ILoggerPtr logger = Implementation<ILogger>::type::GetInstance();
+    /* @Autowired */
+    Private ILoggerPtr logger;
 
     Public MockFlowSensor() : currentMlPerSecond(0), burstRemaining(0) {
         if (logger != nullptr) {
@@ -53,23 +53,7 @@ class MockFlowSensor : public IFlowSensor {
         }
         return 150 + static_cast<Int>(esp_random() % 51);
     }
-
-        public: static IFlowSensorPtr GetInstance() {
-        static IFlowSensorPtr instance(new MockFlowSensor());
-        return instance;
-    }
 };
 
 #endif // MOCKFLOWSENSOR_H
-
-template <>
-struct Implementation<IFlowSensor> {
-    using type = MockFlowSensor;
-};
-
-template <>
-struct Implementation<IFlowSensor*> {
-    using type = MockFlowSensor*;
-};
-
 #endif // ESP_PLATFORM
