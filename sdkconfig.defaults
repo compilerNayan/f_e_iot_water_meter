@@ -1,0 +1,51 @@
+CONFIG_COMPILER_CXX_EXCEPTIONS=y
+CONFIG_COMPILER_CXX_EXCEPTIONS_EMG_POOL_SIZE=0
+
+# Increase main task stack size (needed for TLS handshake)
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=12288
+
+# Enable built-in CA certificate bundle
+CONFIG_ESP_TLS_USE_CA_STORE=y
+CONFIG_ESP_CRYPTO_TLS_SUPPORT_CA_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+# FULL bundle uses more RAM during TLS; CMN is enough for AWS IoT and reduces OOM on enroll.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_CMN=y
+# CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_FULL is not set
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_CROSS_SIGNED_VERIFY=y
+CONFIG_MBEDTLS_CHACHA20_C=y
+CONFIG_MBEDTLS_CHACHAPOLY_C=y
+# TLS 1.3 + mutual auth on ESP32 can timeout/OOM with AWS IoT; use 1.2 for enrollment/MQTT.
+# CONFIG_MBEDTLS_SSL_PROTO_TLS1_3 is not set
+# CONFIG_MBEDTLS_SSL_TLS1_3_KEXM_EPHEMERAL is not set
+CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+CONFIG_MBEDTLS_DYNAMIC_FREE_CONFIG_DATA=y
+
+# --- Core dump (flash) for DeviceDiagnostics / esp_core_dump_get_summary ---
+# Requires coredump partition in partitions.csv (128K).
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+CONFIG_ESP_COREDUMP_ENABLE=y
+CONFIG_ESP_COREDUMP_CHECK_BOOT=y
+# CONFIG_ESP_COREDUMP_ENABLE_TO_NONE is not set
+# CONFIG_ESP_COREDUMP_ENABLE_TO_UART is not set
+# CONFIG_ESP_COREDUMP_FLASH_NO_OVERWRITE is not set
+
+# Richer dump: heap/.bss/.data + more tasks (uses more of coredump partition)
+CONFIG_ESP_COREDUMP_CAPTURE_DRAM=y
+CONFIG_ESP_COREDUMP_MAX_TASKS_NUM=64
+# Dedicated stack for dump writer (more reliable than reusing crashed task stack)
+CONFIG_ESP_COREDUMP_STACK_SIZE=1792
+
+# --- Panic / watchdog: capture dumps on WDT and print panic to UART before reboot ---
+CONFIG_ESP_SYSTEM_PANIC_PRINT_REBOOT=y
+CONFIG_ESP_SYSTEM_PANIC_REBOOT_DELAY_SECONDS=3
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_PANIC_HANDLER_IRAM=y
+
+# Optional: +~5KB DRAM, extra espcoredump component logs (disable in production if tight on RAM)
+# CONFIG_ESP_COREDUMP_LOGS=y
+
+# FreeRTOS task list + stack high-water mark + CPU% for DeviceRuntimeMonitor
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+CONFIG_FREERTOS_USE_STATS_FORMATTING_FUNCTIONS=y
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_FREERTOS_RUN_TIME_STATS_USING_ESP_TIMER=y
