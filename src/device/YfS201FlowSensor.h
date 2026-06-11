@@ -16,12 +16,13 @@
 #define FLOW_SENSOR_PULSES_PER_LITER 450
 #endif
 
-/* @Component */
+static DRAM_ATTR volatile UInt32 gYfS201PulseCount = 0;
+
+/*--@Component--*/
 class YfS201FlowSensor : public IFlowSensor {
     Private Static constexpr Int kPulsesPerLiter = FLOW_SENSOR_PULSES_PER_LITER;
     Private Static constexpr Int kPulsePin = FLOW_SENSOR_PULSE_PIN;
 
-    Private Static inline volatile UInt32 pulseCount = 0;
     Private Int lastPulseCount;
     Private Bool initialized;
 
@@ -36,7 +37,7 @@ class YfS201FlowSensor : public IFlowSensor {
 
     Public Virtual Int GetMlSinceLastSecond() override {
         EnsureInitialized();
-        UInt32 currentCount = pulseCount;
+        UInt32 currentCount = gYfS201PulseCount;
         UInt32 delta = currentCount - static_cast<UInt32>(lastPulseCount);
         lastPulseCount = static_cast<Int>(currentCount);
         if (delta == 0) {
@@ -45,9 +46,9 @@ class YfS201FlowSensor : public IFlowSensor {
         return static_cast<Int>((static_cast<UInt64>(delta) * 1000ULL) / static_cast<UInt64>(kPulsesPerLiter));
     }
 
-    Private Static Void IRAM_ATTR OnPulseEdge(Void* arg) {
+    Private Static Void OnPulseEdge(Void* arg) {
         (void)arg;
-        pulseCount = pulseCount + 1;
+        gYfS201PulseCount = gYfS201PulseCount + 1;
     }
 
     Private Void EnsureInitialized() {
@@ -55,7 +56,7 @@ class YfS201FlowSensor : public IFlowSensor {
             return;
         }
 
-        pulseCount = 0;
+        gYfS201PulseCount = 0;
         lastPulseCount = 0;
 
         gpio_config_t ioConfig = {};
