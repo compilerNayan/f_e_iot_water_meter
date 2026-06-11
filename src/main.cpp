@@ -1,13 +1,16 @@
 #include "iot/IIotApp.h"
 
 #include "IDeviceManager.h"
+#include "service/IValveService.h"
 
+/*--@Autowired--*/
+IValveServicePtr valveService = Implementation<IValveService>::type::GetInstance();
 
 Void DeviceManager::Setup() {
 }
 
 Void DeviceManager::Loop() {
-
+    valveService->RefreshValve();
 }
 
 /*--@Autowired--*/
