@@ -2,19 +2,24 @@
 
 #include "IDeviceManager.h"
 #include "service/IValveService.h"
+#include "service/IFlowTelemetryService.h"
 
-/*--@Autowired--*/
-IValveServicePtr valveService = Implementation<IValveService>::type::GetInstance();
+/* @Autowired */
+IValveServicePtr valveService;
+
+/* @Autowired */
+IFlowTelemetryServicePtr flowTelemetryService;
 
 Void DeviceManager::Setup() {
 }
 
 Void DeviceManager::Loop() {
     valveService->RefreshValve();
+    flowTelemetryService->Tick();
 }
 
-/*--@Autowired--*/
-IIotAppPtr iotApp = Implementation<IIotApp>::type::GetInstance();
+/* @Autowired */
+IIotAppPtr iotApp;
 
 extern "C" void app_main(void) {
     iotApp->Start();
