@@ -27,6 +27,4 @@ class IValveController {
     Public Virtual ResponseEntity<ValveResponseDto> SetValveState(ValveSetRequestDto request) = 0;
 };
 
-#include "ValveController.h"
-#include "/Users/sexydevil/src/automation_src/fresh/f_e_iot_water_meter/src/controller/ValveController.h"
 #endif // IVALVECONTROLLER_H

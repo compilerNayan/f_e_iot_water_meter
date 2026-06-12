@@ -22,5 +22,4 @@ class IValveActuator {
     Public Virtual Int GetActualPercent(Int pin) = 0;
 };
 
-#include "/Users/sexydevil/src/automation_src/fresh/f_e_iot_water_meter/src/device/EspidfValveActuator.h"
 #endif // IVALVEACTUATOR_H
