@@ -1,3 +1,4 @@
+#ifdef MEJERHD
 #ifdef ESP_PLATFORM
 #ifndef MOCKFLOWSENSOR_H
 #define MOCKFLOWSENSOR_H
@@ -57,3 +58,4 @@ class MockFlowSensor : public IFlowSensor {
 
 #endif // MOCKFLOWSENSOR_H
 #endif // ESP_PLATFORM
+#endif // MEJERHD
