@@ -35,7 +35,7 @@ class SecondMockFlowSensor : public IFlowSensor {
             Int ml = kMinMlPerSecond +
                      static_cast<Int>(esp_random() % (kMaxMlPerSecond - kMinMlPerSecond + 1));
             AdvancePhase();
-            printf("Flowing: %d ml\n", ml);
+            printf("Flowing: %d ml, Per Min Value: %d\n", ml, ml * 60);
             return ml;
         }
 

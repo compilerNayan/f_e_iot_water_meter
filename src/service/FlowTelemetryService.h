@@ -130,7 +130,9 @@ class FlowTelemetryService : public IFlowTelemetryService {
         struct tm utc;
         gmtime_r(&now, &utc);
         StdString ts = FormatUtcMinute(utc);
-        StdString payload = "{\"ts\":\"" + ts + "\",\"ml\":" + std::to_string(ml) + "}";
+        StdString payload =
+                "{\"ts\":\"" + ts + "\",\"ml\":" + std::to_string(ml)
+                + ",\"cumulativeLiters\":" + std::to_string(cumulativeLiters) + "}";
         cloudServer->PublishSecondPulse(payload);
     }
 
