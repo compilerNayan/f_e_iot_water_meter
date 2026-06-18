@@ -75,9 +75,9 @@ class FlowTelemetryService : public IFlowTelemetryService {
         minuteMl += ml;
         cumulativeLiters += static_cast<double>(ml) / 1000.0;
 
-        if (ml > 0) {
-            PublishSecondPulse(ml);
-        }
+        // TODO: move socket connectivity heartbeat out of flow telemetry. For now, every 1s
+        // water_pulse (including ml=0) is the lightweight presence heartbeat for the server.
+        PublishSecondPulse(ml);
     }
 
     Private Bool IsTimeValid() {
