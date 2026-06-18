@@ -6,6 +6,7 @@
 #include "IFlowSensor.h"
 #include "driver/gpio.h"
 #include "esp_err.h"
+#include "freertos/portmacro.h"
 #include "logger/ILogger.h"
 
 #ifndef FLOW_SENSOR_PULSE_PIN
@@ -17,6 +18,13 @@
 #endif
 
 static DRAM_ATTR volatile UInt32 gYfS201PulseCount = 0;
+static portMUX_TYPE gYfS201PulseMux = portMUX_INITIALIZER_UNLOCKED;
+static Bool gYfS201HardwareInitialized = false;
+
+static void IRAM_ATTR YfS201OnPulseEdge(void* arg) {
+    (void)arg;
+    gYfS201PulseCount = gYfS201PulseCount + 1;
+}
 
 /* @Component */
 class YfS201FlowSensor : public IFlowSensor {
@@ -24,12 +32,11 @@ class YfS201FlowSensor : public IFlowSensor {
     Private Static constexpr Int kPulsePin = FLOW_SENSOR_PULSE_PIN;
 
     Private Int lastPulseCount;
-    Private Bool initialized;
 
     /* @Autowired */
     Private ILoggerPtr logger;
 
-    Public YfS201FlowSensor() : lastPulseCount(0), initialized(false) {
+    Public YfS201FlowSensor() : lastPulseCount(0) {
         EnsureInitialized();
     }
 
@@ -37,19 +44,13 @@ class YfS201FlowSensor : public IFlowSensor {
 
     Public Virtual Int GetMlSinceLastSecond() override {
         EnsureInitialized();
-        UInt32 currentCount = gYfS201PulseCount;
-        UInt32 delta = currentCount - static_cast<UInt32>(lastPulseCount);
 
-        if (delta > 0 && logger != nullptr) {
-            for (UInt32 pulse = static_cast<UInt32>(lastPulseCount) + 1; pulse <= currentCount; ++pulse) {
-                Int accumulatedMl = static_cast<Int>(
-                    (static_cast<UInt64>(pulse) * 1000ULL) / static_cast<UInt64>(kPulsesPerLiter));
-                logger->Info(
-                    Tag::Untagged,
-                    "[YfS201FlowSensor] pulse=" + std::to_string(pulse) +
-                        " accumulatedMl=" + std::to_string(accumulatedMl));
-            }
-        }
+        UInt32 currentCount = 0;
+        portENTER_CRITICAL(&gYfS201PulseMux);
+        currentCount = gYfS201PulseCount;
+        portEXIT_CRITICAL(&gYfS201PulseMux);
+
+        const UInt32 delta = currentCount - static_cast<UInt32>(lastPulseCount);
 
         lastPulseCount = static_cast<Int>(currentCount);
         if (delta == 0) {
@@ -58,13 +59,8 @@ class YfS201FlowSensor : public IFlowSensor {
         return static_cast<Int>((static_cast<UInt64>(delta) * 1000ULL) / static_cast<UInt64>(kPulsesPerLiter));
     }
 
-    Private Static Void OnPulseEdge(Void* arg) {
-        (void)arg;
-        gYfS201PulseCount = gYfS201PulseCount + 1;
-    }
-
     Private Void EnsureInitialized() {
-        if (initialized) {
+        if (gYfS201HardwareInitialized) {
             return;
         }
 
@@ -83,9 +79,9 @@ class YfS201FlowSensor : public IFlowSensor {
         if (isrResult != ESP_OK && isrResult != ESP_ERR_INVALID_STATE) {
             return;
         }
-        gpio_isr_handler_add(static_cast<gpio_num_t>(kPulsePin), OnPulseEdge, nullptr);
+        gpio_isr_handler_add(static_cast<gpio_num_t>(kPulsePin), YfS201OnPulseEdge, nullptr);
 
-        initialized = true;
+        gYfS201HardwareInitialized = true;
 
         if (logger != nullptr) {
             logger->Info(
