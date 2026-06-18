@@ -9,7 +9,7 @@
 #include "logger/ILogger.h"
 
 #ifndef FLOW_SENSOR_PULSE_PIN
-#define FLOW_SENSOR_PULSE_PIN 18
+#define FLOW_SENSOR_PULSE_PIN 15
 #endif
 
 #ifndef FLOW_SENSOR_PULSES_PER_LITER
@@ -39,6 +39,18 @@ class YfS201FlowSensor : public IFlowSensor {
         EnsureInitialized();
         UInt32 currentCount = gYfS201PulseCount;
         UInt32 delta = currentCount - static_cast<UInt32>(lastPulseCount);
+
+        if (delta > 0 && logger != nullptr) {
+            for (UInt32 pulse = static_cast<UInt32>(lastPulseCount) + 1; pulse <= currentCount; ++pulse) {
+                Int accumulatedMl = static_cast<Int>(
+                    (static_cast<UInt64>(pulse) * 1000ULL) / static_cast<UInt64>(kPulsesPerLiter));
+                logger->Info(
+                    Tag::Untagged,
+                    "[YfS201FlowSensor] pulse=" + std::to_string(pulse) +
+                        " accumulatedMl=" + std::to_string(accumulatedMl));
+            }
+        }
+
         lastPulseCount = static_cast<Int>(currentCount);
         if (delta == 0) {
             return 0;
