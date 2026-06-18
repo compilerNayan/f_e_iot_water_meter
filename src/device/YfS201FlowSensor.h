@@ -1,4 +1,3 @@
-#ifdef AAMIIE
 #ifdef ESP_PLATFORM
 #ifndef YFS201FLOWSENSOR_H
 #define YFS201FLOWSENSOR_H
@@ -87,4 +86,3 @@ class YfS201FlowSensor : public IFlowSensor {
 
 #endif // YFS201FLOWSENSOR_H
 #endif // ESP_PLATFORM
-#endif // AAMIIE

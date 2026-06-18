@@ -1,3 +1,4 @@
+#ifdef KSHDHSJKDH
 #ifdef ESP_PLATFORM
 #ifndef SECONDMOCKFLOWSENSOR_H
 #define SECONDMOCKFLOWSENSOR_H
@@ -62,3 +63,4 @@ class SecondMockFlowSensor : public IFlowSensor {
 
 #endif // SECONDMOCKFLOWSENSOR_H
 #endif // ESP_PLATFORM
+#endif // KSHDHSJKDH
