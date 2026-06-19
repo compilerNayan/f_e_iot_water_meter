@@ -44,6 +44,7 @@ class FlowTelemetryService : public IFlowTelemetryService {
     Private Int minuteMl;
     Private double cumulativeLiters;
     Private StdVector<MinuteBucketEntryDto> windowMinutes;
+    Private Bool bootEnvelopeSent;
 
     Public FlowTelemetryService()
         : lastSecondTickUs(0),
@@ -52,13 +53,18 @@ class FlowTelemetryService : public IFlowTelemetryService {
           minuteInitialized(false),
           minuteMl(0),
           cumulativeLiters(0.0),
-          windowMinutes() {
+          windowMinutes(),
+          bootEnvelopeSent(false) {
         LoadCumulativeFromStore();
     }
 
     Public Virtual ~FlowTelemetryService() = default;
 
     Public Virtual Void Tick() override {
+        if (!bootEnvelopeSent) {
+            TryPublishDeviceBoot();
+        }
+
         Int64 nowUs = esp_timer_get_time();
         if (lastSecondTickUs != 0 && (nowUs - lastSecondTickUs) < kSecondUs) {
             return;
@@ -118,6 +124,16 @@ class FlowTelemetryService : public IFlowTelemetryService {
         windowMinutes.push_back(MinuteBucketEntryDto(FormatUtcMinute(minuteUtc), ml));
         while (static_cast<Int>(windowMinutes.size()) > kWindowSize) {
             windowMinutes.erase(windowMinutes.begin());
+        }
+    }
+
+    Private Void TryPublishDeviceBoot() {
+        ICloudServerPtr cloudServer = serverProvider->GetCloudServerPtr();
+        if (cloudServer == nullptr || !cloudServer->IsRunning()) {
+            return;
+        }
+        if (cloudServer->PublishDeviceBoot("{}")) {
+            bootEnvelopeSent = true;
         }
     }
 
